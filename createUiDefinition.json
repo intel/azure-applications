@@ -1,0 +1,73 @@
+{
+  "handler": "Microsoft.Compute.MultiVm",
+  "version": "0.1.0-preview",
+  "parameters": {
+    "basics": [
+      {
+        "name": "vmName",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Name",
+        "toolTip": "The name of the virtual machine.",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-zA-Z][a-zA-Z0-9-]{2,13}[a-zA-Z0-9]$",
+          "validationMessage": "VM names must be between 3 and 15 characters long, and can contain only numbers, letters, and hyphens."
+        }
+      },
+      {
+        "name": "adminUsername",
+        "type": "Microsoft.Compute.UserNameTextBox",
+        "label": "User name",
+        "toolTip": "Admin username for the virtual machines.",
+        "osPlatform": "Windows"
+      },
+      {
+        "name": "adminPassword",
+        "type": "Microsoft.Compute.CredentialsCombo",
+        "label": {
+          "password": "Password",
+          "confirmPassword": "Confirm password"
+        },
+        "toolTip": {
+          "password": "Admin password for the virtual machines."
+        },
+        "osPlatform": "Windows"
+      }
+    ],
+    "steps": [
+      {
+        "name": "infrastructureConfig",
+        "label": "Settings",
+        "subLabel": {
+          "preValidation": "Configure additional settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Settings",
+        "elements": [
+          {
+            "name": "vmSize",
+            "type": "Microsoft.Compute.SizeSelector",
+            "label": "Virtual machine size",
+            "toolTip": "The size of the virtual machine.",
+            "recommendedSizes": [
+              "Standard_F8s_v2",
+              "Standard_F16s_v2",
+              "Standard_F32s_v2",
+              "Standard_F72s_v2"
+            ],
+            "constraints": {
+              "required": true
+            },
+            "osPlatform": "Windows"
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "adminUsername": "[basics('adminUsername')]",
+      "adminPassword": "[basics('adminPassword').password]",
+      "vmSize": "[steps('infrastructureConfig').vmSize]",
+      "vmName": "[basics('vmName')]"
+    }
+  }
+}
