@@ -2,6 +2,14 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "baseURL": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URL for dependent assets",
+                "artifactsBaseUrl": ""
+            },
+            "defaultValue": ""
+        }, 
         "adminUsername": {
             "type": "string",
             "metadata": {
@@ -51,7 +59,7 @@
         "commandToExecute": "bash intel_ml_envs.sh"        
     },
     "resources": [
-		{
+        {
             "apiVersion": "2018-02-01",
             "name": "pid-90a969a1-f37f-5938-a168-fee1e48baab4",
             "type": "Microsoft.Resources/deployments",
@@ -216,7 +224,7 @@
                     }
                 }
             },
-			"resources": [
+            "resources": [
                 {
                  "type": "extensions",
                  "name": "[variables('vmName')]",
@@ -231,7 +239,7 @@
                    "typeHandlerVersion": "1.4",
                    "autoUpgradeMinorVersion": true,
                    "settings": {
-                     "fileUris": "['/intel_ml_envs.sh']",
+                     "fileUris": "[concat(parameters('baseURL'),'/ intel_ml_envs.sh')]",
                      "commandToExecute": "[variables('commandToExecute')]"
                    }
                  }
