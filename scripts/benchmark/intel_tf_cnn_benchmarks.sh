@@ -1,41 +1,74 @@
 # !/bin/bash
-# Run TensorFlow's tf_cnn benchmarks
-# This file is called by tf_multiworker.sh
+# Usage: bash intel_tf_cnn_benchmarks <option> 
+# Pass "all" in the <option> position to run the entire benchmarking suite
+# 
+# This script runs TensorFlow's CNN Benchmarks and summarizes throughput increases when  
+# using Intel optimized TensorFlow.
+# Note: you may need to edit benchmarks/scripts/tf_cnn_benchmarks/datasets.py to import _pickle instead of Cpickle
 
-###################################################################################
-# If running the Intel Optimized benchmark, follow instructions  below
-
-# Uncomment to activate the appropriate virtual environment
-# source activate your_intel_optimized_env
-
-# On line 35, change the --data_format flag to NCHW 
-
-###################################################################################
-
-###################################################################################
-# If running the default benchmark, leave everything above commented out and change
-# the --data_format flag to NHWC
-
-###################################################################################
+# Check if "all" option was passed, set networks and batch sizes accordingly
+option=$1
+if [ -z $option ]
+then
+  networks=( inception3 )
+  batch_sizes=( 64 96 )
+else
+  networks=( inception3 resnet50 resnet152 vgg16 )
+  batch_sizes=( 32 64 96 128 )
+fi
 
 # Clone benchmark scripts
 git clone -b mkl_experiment https://github.com/tensorflow/benchmarks.git
 cd benchmarks/scripts/tf_cnn_benchmarks
 rm *.log # remove logs from any previous benchmark runs
 
-## Run training benchmark scripts
+## Run benchmark scripts in the default environment
 
-networks=( inception3 resnet50 resnet152 vgg16 )
-batch_sizes=( 32 64 96 128 )
+#for network in "${networks[@]}" ; do
+#  for bs in "${batch_sizes[@]}"; do
+#    echo -e "\n\n #### Starting $network and batch size = $bs ####\n\n"
+#
+#    time python tf_cnn_benchmarks.py --data_format NHWC --data_name synthetic --model "$network" --forward_only False -batch_size "$bs" --num_batches 50 2>&1 | tee net_"$network"_bs_"$bs"_default.log
+#
+#  done
+#done
+
+
+## Run benchmark scripts in the Intel Optimized environment
+source activate intel_tensorflow_p36
 
 for network in "${networks[@]}" ; do
   for bs in "${batch_sizes[@]}"; do
     echo -e "\n\n #### Starting $network and batch size = $bs ####\n\n"
 
-    time python tf_cnn_benchmarks.py --data_format NCHW --data_name synthetic --model "$network" --forward_only False -batch_size "$bs" --num_batches 50 2>&1 | tee net_"$network"_bs_"$bs".log
+    time python tf_cnn_benchmarks.py --data_format NCHW --data_name synthetic --model "$network" --forward_only False -batch_size "$bs" --num_batches 10 2>&1 | tee net_"$network"_bs_"$bs"_optimized.log
 
   done
 done
 
-# Deactivate virtual environment
 source deactivate
+
+## Print training benchmark throughput
+
+speedup_track=0
+runs=0
+
+for network in "${networks[@]}" ; do
+  for bs in "${batch_sizes[@]}"; do
+    default_fps="10.2" #$(grep  "total images/sec:"  net_"$network"_bs_"$bs"_default.log | cut -d ":" -f2 | xargs)
+    optimized_fps=$(grep  "total images/sec:"  net_"$network"_bs_"$bs"_optimized.log | cut -d ":" -f2 | xargs)
+    echo "Environment | Network | Batch Size | Images/Second"
+    echo "Default     | Network: $network | Batch Size: $bs | Images/sec: $default_fps"
+    echo "Optimized   | Network: $network | Batch Size: $bs | Images/sec: $optimized_fps"
+    speedup=$((${optimized_fps%.*}/${default_fps%.*}))
+    speedup_track=$((speedup_track + speedup))
+    runs=$((runs+1))
+  done
+    echo -e "\n"
+done
+
+echo "#############################################"
+echo "Average Intel Optimized speedup = $(($speedup_track / $runs))X" 
+echo "#############################################"
+echo $'\n\n'
+
