@@ -64,8 +64,8 @@ for network in "${networks[@]}" ; do
   for bs in "${batch_sizes[@]}"; do
     default_fps=$(grep  "total images/sec:"  net_"$network"_bs_"$bs"_default.log | cut -d ":" -f2 | xargs)
     optimized_fps=$(grep  "total images/sec:"  net_"$network"_bs_"$bs"_optimized.log | cut -d ":" -f2 | xargs)
-    echo "Default     | $network |    $bs    | $default_fps"
-    echo "Optimized   | $network |    $bs    | $optimized_fps"
+    echo "Default     | $network |     $bs     | $default_fps"
+    echo "Optimized   | $network |     $bs     | $optimized_fps"
     speedup=$((${optimized_fps%.*}/${default_fps%.*}))
     speedup_track=$((speedup_track + speedup))
     runs=$((runs+1))
