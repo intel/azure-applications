@@ -10,11 +10,11 @@ Instructions are organized into two sections:
 2. Launch via the Azure CLI, and
 3. Launch manually via the Azure portal
 
-##1. Launch via the Azure Marketplace
+## 1. Launch via the Azure Marketplace
 
 Please see our recent blog post [needs link] for instructions on launching from the Azure Marketplace. 
 
-##2. Quick Launch Using Azure Cloud Shell
+## 2. Quick Launch Using Azure Cloud Shell
 Launch [Azure Cloud Shell](https://docs.microsoft.com/en-us/azure/cloud-shell/overview) and choose PowerShell from the shell dropdown. 
 Run the following commands to launch a DSVM with Intel optimized deep learning frameworks.
 
@@ -30,7 +30,7 @@ az group deployment create --resource-group <myResourceGroup> \
 
 ```
 
-## Launch from your local machine
+### Launch from your local machine
 
 1. [Install Azure CLI.](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) We recommend to run Azure CLI in [Docker container](https://docs.microsoft.com/en-us/cli/azure/run-azure-cli-docker?view=azure-cli-latest) 
     * `docker run -it microsoft/azure-cli`
