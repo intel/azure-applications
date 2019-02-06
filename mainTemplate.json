@@ -239,7 +239,7 @@
                    "typeHandlerVersion": "1.4",
                    "autoUpgradeMinorVersion": true,
                    "settings": {
-                     "fileUris": "[concat(parameters('baseURL'),'/ intel_ml_envs.sh')]",
+                     "fileUris": ["[concat(parameters('baseURL'),'/intel_ml_envs.sh')]"],
                      "commandToExecute": "[variables('commandToExecute')]"
                    }
                  }
