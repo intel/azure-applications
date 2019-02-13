@@ -26,7 +26,8 @@
 # Note: you may need to edit benchmarks/scripts/tf_cnn_benchmarks/datasets.py to 
 # import _pickle instead of Cpickle
 
-
+# Set number of batches
+num_batches=( 30 )
 # Check if "all" option was passed, set networks and batch sizes accordingly
 option=$1
 if [ -z $option ]
@@ -35,11 +36,11 @@ then
   batch_sizes=( 64 )
 else
   networks=( inception3 resnet50 resnet152 vgg16 )
-  batch_sizes=( 32 64 96 128 )
+  batch_sizes=( 32 64 128 )
 fi
 
 # Clone benchmark scripts
-git clone -b mkl_experiment https://github.com/tensorflow/benchmarks.git
+git clone -b cnn_tf_v1.12_compatible  https://github.com/tensorflow/benchmarks.git
 cd benchmarks/scripts/tf_cnn_benchmarks
 rm *.log # remove logs from any previous benchmark runs
 
@@ -50,11 +51,11 @@ for network in "${networks[@]}" ; do
 
     time python tf_cnn_benchmarks.py \
     --data_format NHWC \
-    --data_name synthetic \
+    --data_name imagenet \
+    --device cpu \
     --model "$network" \
-    --forward_only False \
     --batch_size "$bs" \
-    --num_batches 50 \
+    --num_batches "$num_batches" \
     2>&1 | tee net_"$network"_bs_"$bs"_default.log
 
   done
@@ -69,11 +70,12 @@ for network in "${networks[@]}" ; do
 
     time python tf_cnn_benchmarks.py \
     --data_format NCHW \
-    --data_name synthetic \
+    --data_name imagenet \
+    --device cpu \
+    --mkl True \
     --model "$network" \
-    --forward_only False \
     --batch_size "$bs" \
-    --num_batches 50 \
+    --num_batches "$num_batches" \
     2>&1 | tee net_"$network"_bs_"$bs"_optimized.log
 
   done
