@@ -16,9 +16,9 @@
 #
 
 ####### USAGE #########
-# bash intel_tf_cnn_benchmarks <option> 
+# bash intel_tf_cnn_benchmarks.sh <option> 
 # 
-# By default, this runs only InceptionV3 at batch size 64. Pass "all" in the <option> 
+# By default, this runs only InceptionV3 at batch size 128. Pass "all" in the <option> 
 # position to run all networks and batch sizes in the benchmarking suite.
 # 
 # This script runs TensorFlow's CNN Benchmarks and summarizes throughput increases when  
@@ -28,12 +28,13 @@
 
 # Set number of batches
 num_batches=( 30 )
+
 # Check if "all" option was passed, set networks and batch sizes accordingly
 option=$1
 if [ -z $option ]
 then
   networks=( inception3 )
-  batch_sizes=( 64 )
+  batch_sizes=( 128 )
 else
   networks=( inception3 resnet50 resnet152 vgg16 )
   batch_sizes=( 32 64 128 )
