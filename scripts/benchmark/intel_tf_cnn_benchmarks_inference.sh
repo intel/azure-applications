@@ -15,65 +15,106 @@
 # limitations under the License.
 #
 
-# Run TensorFlow's tf_cnn benchmarks with various networks and batchsizes with MKL.
-# Assumption is TF w/ MKL is installed.
+####### USAGE #########
+# bash intel_tf_cnn_benchmarks.sh <option> 
+# 
+# By default, this runs only InceptionV3 at batch size 128. Pass "all" in the <option> 
+# position to run all networks and batch sizes in the benchmarking suite.
+# 
+# This script runs inference with TensorFlow's CNN Benchmarks and summarizes throughput
+# increases when using Intel optimized TensorFlow.
+# Note: you may need to edit benchmarks/scripts/tf_cnn_benchmarks/datasets.py to 
+# import _pickle instead of Cpickle
 
-#Set benchmark parameters.
+# Set number of batches
+num_batches=( 30 )
 num_warmup_batches=20
-num_batches=30
 num_inter_threads=2
 kmp_blocktime=0
-
-#networks=( alexnet googlenet inception3 resnet50 resnet152 vgg16 )
-networks=( inception3 resnet50 resnet152 vgg16 )
-batch_sizes=( 1 16 32 64 128 )
 
 # Assign num_cores to the number of physical cores on your machine
 cores_per_socket=`lscpu | grep "Core(s) per socket" | cut -d':' -f2 | xargs`
 num_sockets=`lscpu | grep "Socket(s)" | cut -d':' -f2 | xargs`
 num_cores=$((cores_per_socket * num_sockets))
 
-if [ -d benchmarks ]
+# Check if "all" option was passed, set networks and batch sizes accordingly
+option=$1
+if [ -z $option ]
 then
-    echo -e "tf_cnn_bechmarks repo exists. Will use the existing repo \n"
+  networks=( inception3 )
+  batch_sizes=( 128 )
 else
-    git clone https://github.com/tensorflow/benchmarks.git
-    echo -e "Downloaded tf_cnn_bechmarks repo. \n"
+  networks=( inception3 resnet50 resnet152 vgg16 )
+  batch_sizes=( 32 64 128 )
 fi
 
-cd benchmarks/scripts/tf_cnn_benchmarks/
+# Clone benchmark scripts
+git clone -b cnn_tf_v1.12_compatible  https://github.com/tensorflow/benchmarks.git
+cd benchmarks/scripts/tf_cnn_benchmarks
+rm *.log # remove logs from any previous benchmark runs
 
-date > start_bench_dummydata_inf_mkl.txt
-
-start=$(date +'%s')
+## Run benchmark scripts in the default environment
 for network in "${networks[@]}" ; do
   for bs in "${batch_sizes[@]}"; do
-        sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
-        echo -e "\n\n #### Starting Inference with DummyData: $network ,BS = $bs ####\n\n"
+    echo -e "\n\n #### Starting $network and batch size = $bs ####\n\n"
 
-        time python tf_cnn_benchmarks.py --device=cpu --mkl=True --data_format=NCHW \
-              --kmp_affinity='granularity=fine,noverbose,compact,1,0' \
-              --kmp_blocktime=$kmp_blocktime --kmp_settings=1 \
-              --num_warmup_batches=$num_warmup_batches --batch_size=$bs \
-              --num_batches=$num_batches --model=$network  \
-              --num_intra_threads=$num_cores --num_inter_threads=$num_inter_threads \
-              --forward_only=True \
-              2>&1 | tee mkl_inf_numcores_${num_cores}_net_${network}_bs_${bs}.log
+    time python tf_cnn_benchmarks.py --device=cpu --mkl=False --data_format=NHWC \
+    --num_warmup_batches=$num_warmup_batches --batch_size=$bs \
+    --num_batches=$num_batches --model=$network  \
+    --num_intra_threads=$num_cores --num_inter_threads=$num_inter_threads \
+    --forward_only=True \
+    2>&1 | tee net_"$network"_bs_"$bs"_default_inf.log
 
-        echo -e "#### Finished MKL Inference w/DummyData: $network with BS=$bs ####"
   done
 done
-echo -e "\n\n ## MKL Inference w/DummyData script took $(($(date +'%s') - $start)) seconds \n"
-date > stop_bench_dummydata_inf_mkl.txt
 
-## Print benchmark throughput
-
-echo -e "\nNetwork batch_size images/second (Inference) \n"
+## Run benchmark scripts in the Intel Optimized environment
+source activate intel_tensorflow_p36
 
 for network in "${networks[@]}" ; do
   for bs in "${batch_sizes[@]}"; do
-    fps=$(grep  "total images/sec:"  mkl_inf_numcores_${num_cores}_net_${network}_bs_${bs}.log | cut -d ":" -f2 | xargs)
-    echo "$network $bs $fps"
+    echo -e "\n\n #### Starting $network and batch size = $bs ####\n\n"
+
+    time python tf_cnn_benchmarks.py --device=cpu --mkl=True --data_format=NCHW \
+    --kmp_affinity='granularity=fine,noverbose,compact,1,0' \
+    --kmp_blocktime=$kmp_blocktime --kmp_settings=1 \
+    --num_warmup_batches=$num_warmup_batches --batch_size=$bs \
+    --num_batches=$num_batches --model=$network  \
+    --num_intra_threads=$num_cores --num_inter_threads=$num_inter_threads \
+    --forward_only=True \
+    2>&1 | tee net_"$network"_bs_"$bs"_optimized_inf.log
+
+  done
+done
+
+source deactivate
+
+## Print a summary of training throughputs and relative speedups across all networks/batch sizes
+
+speedup_track=0
+runs=0
+
+# Set headers
+echo $'\n\n\n\n'
+echo "######### Executive Summary #########"
+echo $'\n'
+echo "Environment |  Network   | Batch Size | Images/Second"
+echo "--------------------------------------------------------"
+for network in "${networks[@]}" ; do
+  for bs in "${batch_sizes[@]}"; do
+    default_fps=$(grep  "total images/sec:"  net_"$network"_bs_"$bs"_default_inf.log | cut -d ":" -f2 | xargs)
+    optimized_fps=$(grep  "total images/sec:"  net_"$network"_bs_"$bs"_optimized_inf.log | cut -d ":" -f2 | xargs)
+    echo "Default     | $network |     $bs     | $default_fps"
+    echo "Optimized   | $network |     $bs     | $optimized_fps"
+    speedup=$((${optimized_fps%.*}/${default_fps%.*}))
+    speedup_track=$((speedup_track + speedup))
+    runs=$((runs+1))
   done
     echo -e "\n"
 done
+
+echo "#############################################"
+echo "Average Intel Optimized speedup = $(($speedup_track / $runs))X" 
+echo "#############################################"
+echo $'\n\n'
+
