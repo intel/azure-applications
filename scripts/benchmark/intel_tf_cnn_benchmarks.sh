@@ -21,7 +21,7 @@
 # By default, this runs only InceptionV3 at batch size 128. Pass "all" in the <option> 
 # position to run all networks and batch sizes in the benchmarking suite.
 # 
-# This script runs TensorFlow's CNN Benchmarks and summarizes throughput increases when  
+# This script runs training with TensorFlow's CNN Benchmarks and summarizes throughput increases when  
 # using Intel optimized TensorFlow.
 # Note: you may need to edit benchmarks/scripts/tf_cnn_benchmarks/datasets.py to 
 # import _pickle instead of Cpickle
