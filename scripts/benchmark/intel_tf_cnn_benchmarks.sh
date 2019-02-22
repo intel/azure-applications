@@ -73,7 +73,7 @@ for network in "${networks[@]}" ; do
     --data_format NCHW \
     --data_name imagenet \
     --device cpu \
-    --mkl True \
+    --mkl=True \
     --model "$network" \
     --batch_size "$bs" \
     --num_batches "$num_batches" \
