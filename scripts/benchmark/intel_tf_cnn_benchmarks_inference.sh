@@ -28,7 +28,7 @@
 
 # Set number of batches
 num_batches=( 30 )
-num_warmup_batches=20
+num_warmup_batches=50
 num_inter_threads=2
 kmp_blocktime=0
 
@@ -42,10 +42,10 @@ option=$1
 if [ -z $option ]
 then
   networks=( inception3 )
-  batch_sizes=( 128 )
+  batch_sizes=( 1 )
 else
   networks=( inception3 resnet50 resnet152 vgg16 )
-  batch_sizes=( 32 64 128 )
+  batch_sizes=( 1 )
 fi
 
 # Clone benchmark scripts
