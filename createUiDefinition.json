@@ -1,6 +1,7 @@
 {
   "handler": "Microsoft.Compute.MultiVm",
-  "version": "0.1.0-preview",
+  "version": "0.1.2-preview",
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
   "parameters": {
     "basics": [
       {
@@ -67,7 +68,8 @@
       "adminUsername": "[basics('adminUsername')]",
       "adminPassword": "[basics('adminPassword').password]",
       "vmSize": "[steps('infrastructureConfig').vmSize]",
-      "vmName": "[basics('vmName')]"
+      "vmName": "[basics('vmName')]",
+      "location": "[location()]"
     }
   }
 }
