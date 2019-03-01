@@ -13,7 +13,7 @@ source activate intel_tensorflow_p27
 export KMP_AFFINITY=granularity=fine,verbose,compact,1,0
 export KMP_BLOCKTIME=1
 export KMP_SETTINGS=1
-export OMP_NUM_THREADS=lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g"
+export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
 export OMP_PROC_BIND=true
 conda install -y -c anaconda tensorflow
 pip install keras
@@ -25,7 +25,7 @@ source activate intel_tensorflow_p36
 export KMP_AFFINITY=granularity=fine,verbose,compact,1,0
 export KMP_BLOCKTIME=1
 export KMP_SETTINGS=1
-export OMP_NUM_THREADS=lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g"
+export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
 export OMP_PROC_BIND=true
 conda install -y -c anaconda tensorflow
 pip install keras
