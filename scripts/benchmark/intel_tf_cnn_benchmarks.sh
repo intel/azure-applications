@@ -40,8 +40,16 @@ else
   batch_sizes=( 32 64 128 )
 fi
 
-# Clone benchmark scripts
-git clone -b cnn_tf_v1.12_compatible  https://github.com/tensorflow/benchmarks.git
+# Check TF version so that we clone the right benchmarks
+source activate intel_tensorflow_p36
+export tfversion=$(python -c "import tensorflow as tf;print(tf.__version__)")
+source deactivate
+arr=(${tfversion//./ })  # Parse version and release
+export version=${arr[0]}
+export release=${arr[1]}
+
+# Clone benchmark scripts for appropriate TF version
+git clone -b cnn_tf_v${version}.${release}_compatible  https://github.com/tensorflow/benchmarks.git
 cd benchmarks/scripts/tf_cnn_benchmarks
 rm *.log # remove logs from any previous benchmark runs
 
