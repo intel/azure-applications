@@ -11,7 +11,7 @@ The [Intel® Optimized Data Science Virtual Machine](https://azuremarketplace.mi
 
 #### Launch via the Azure Marketplace:
 
-Search for _Intel Optimized Data Science VM for Linux (Ubuntu)_ at [Azure Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/), click **GET IT NOW** and follow the prompts to launch the VM. 
+[Click here](http://aka.ms/dsvm/intel) to view the offer in the Azure Marketplace, and click **GET IT NOW** and follow the prompts to launch the VM. [See this post](https://www.intel.ai/intel-optimized-data-science-virtual-machine-azure/?utm_campaign=2019-Q1-US-AI-Always-On-IntelAI_LI) for step by step instructions.
 
 **Note:**  This VM takes about 10 minutes to launch. At creation, a custom extension triggers a one-time installation of the latest Intel® Optimized deep learning frameworks. Once launched, you will be able to start and stop the VM as usual.
 Instructions are organized into two sections:
