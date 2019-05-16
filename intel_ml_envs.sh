@@ -48,9 +48,8 @@ export OMP_PROC_BIND=true
 conda deactivate
 
 # Create Python 2.7 PyTorch env
-yes 'y' | conda create -n intel_pytorch_p27 -c intel python=2 pip numpy pyyaml mkl setuptools cmake cffi
+yes 'y' | conda create -n intel_pytorch_p27 -c intel python=2 pip numpy pyyaml mkl mkl-include setuptools cmake cffi typing
 source activate intel_pytorch_p27
-cd
 git clone --recursive https://github.com/intel/pytorch
 export NO_CUDA=1
 export CMAKE_PREFIX_PATH=~/anaconda3/
@@ -59,9 +58,8 @@ python setup.py install
 conda deactivate
 
 # Create Python 3.6 PyTorch env
-yes 'y' | conda create -n intel_pytorch_p36 -c intel python=3 pip numpy pyyaml mkl setuptools cmake cffi
+yes 'y' | conda create -n intel_pytorch_p36 -c intel python=3 pip numpy pyyaml mkl mkl-include setuptools cmake cffi typing
 source activate intel_pytorch_p36
-cd
 export NO_CUDA=1
 export CMAKE_PREFIX_PATH=~/anaconda3/
 cd pytorch
