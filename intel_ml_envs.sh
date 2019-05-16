@@ -39,7 +39,7 @@ conda deactivate
 
 # Create Python 3.6 MXNet env
 yes 'y' | conda create -n intel_mxnet_p36 -c intel python=3 numpy opencv Pillow scipy scikit-learn mxnet-mkl keras
-source activate intel_mxnet_p27
+source activate intel_mxnet_p36
 export LD_LIBRARY_PATH=/usr/local/lib
 export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
 export KMP_AFFINITY=granularity=fine,compact,1,0
