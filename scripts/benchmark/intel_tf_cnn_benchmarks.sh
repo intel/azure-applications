@@ -41,9 +41,9 @@ else
 fi
 
 # Check TF version so that we clone the right benchmarks
-source activate intel_tensorflow_p36
+conda activate intel_tensorflow_p36
 export tfversion=$(python -c "import tensorflow as tf;print(tf.__version__)")
-source deactivate
+conda deactivate
 arr=(${tfversion//./ })  # Parse version and release
 export version=${arr[0]}
 export release=${arr[1]}
@@ -53,6 +53,8 @@ git clone -b cnn_tf_v${version}.${release}_compatible  https://github.com/tensor
 cd benchmarks/scripts/tf_cnn_benchmarks
 rm *.log # remove logs from any previous benchmark runs
 
+conda activate py36
+pip install tensorflow
 ## Run benchmark scripts in the default environment
 for network in "${networks[@]}" ; do
   for bs in "${batch_sizes[@]}"; do
@@ -70,8 +72,10 @@ for network in "${networks[@]}" ; do
   done
 done
 
+conda deactivate 
+
 ## Run benchmark scripts in the Intel Optimized environment
-source activate intel_tensorflow_p36
+conda activate intel_tensorflow_p36
 
 for network in "${networks[@]}" ; do
   for bs in "${batch_sizes[@]}"; do
@@ -90,7 +94,7 @@ for network in "${networks[@]}" ; do
   done
 done
 
-source deactivate
+conda deactivate
 
 ## Print a summary of training throughputs and relative speedups across all networks/batch sizes
 
