@@ -43,7 +43,7 @@ fi
 # Check TF version so that we clone the right benchmarks
 source activate intel_tensorflow_p36
 export tfversion=$(python -c "import tensorflow as tf;print(tf.__version__)")
-source deactivate
+conda deactivate
 arr=(${tfversion//./ })  # Parse version and release
 export version=${arr[0]}
 export release=${arr[1]}
@@ -90,7 +90,7 @@ for network in "${networks[@]}" ; do
   done
 done
 
-source deactivate
+conda deactivate
 
 ## Print a summary of training throughputs and relative speedups across all networks/batch sizes
 
