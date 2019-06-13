@@ -36,7 +36,7 @@ else
     export KMP_SETTINGS=1
     export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
     export OMP_PROC_BIND=true
-    conda install -y tensorflow keras
+    conda install -y -c intel tensorflow keras
 fi
 
 EOT
@@ -67,7 +67,7 @@ else
     export KMP_SETTINGS=1
     export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
     export OMP_PROC_BIND=true
-    conda install -y mxnet-mkl
+    conda install -y -c intel mxnet-mkl
 fi
 
 EOT
