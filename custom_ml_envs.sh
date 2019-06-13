@@ -1,5 +1,9 @@
 # !/bin/bash
-# Usage: bash intel_optimized_ml_envs.sh
+# Usage: bash custom_ml_envs.sh
+
+# Note: in conda 4.6, the post-activate file is sourced every
+# time conda is run, not just every time we activate the 
+# environment, as in 4.3.
 
 # Add conda, activate to PATH
 export PATH=/anaconda/envs/py35/bin:$PATH
@@ -21,23 +25,22 @@ touch $LOCATION/etc/conda/activate.d/install_tf27.sh
 cat <<EOT >> $LOCATION/etc/conda/activate.d/install_tf27.sh
 # !/bin/bash
 # Check if TensorFlow is already installed
-if conda list | grep 'tensorflow-base';
+if conda list | grep -q 'intel-tensorflow';
 then
     :
 else
     echo "Installing Intel Optimized TensorFlow..."
     echo "This is a one-time installation, and may take a minute..."
-    conda install -y numpy tensorflow keras
-    export KMP_AFFINITY=granularity=fine,verbose,compact,1,0
+    export KMP_AFFINITY=granularity=fine,noverbose,compact,1,0
     export KMP_BLOCKTIME=1
     export KMP_SETTINGS=1
     export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
     export OMP_PROC_BIND=true
-    echo "This environment is ready to use!"
+    conda install -y numpy tensorflow keras
 fi
 
 EOT
-source deactivate
+conda deactivate
 
 
 #### Create Python 3.6 TensorFlow env ####
@@ -53,23 +56,22 @@ touch $LOCATION/etc/conda/activate.d/install_tf36.sh
 cat <<EOT >> $LOCATION/etc/conda/activate.d/install_tf36.sh
 # !/bin/bash
 # Check if TensorFlow is already installed
-if conda list | grep 'tensorflow-base';
+if conda list | grep -q 'intel-tensorflow';
 then
     :
 else
     echo "Installing Intel Optimized TensorFlow..."
     echo "This is a one-time installation, and may take a minute..."
-    conda install -y numpy tensorflow keras
-    export KMP_AFFINITY=granularity=fine,verbose,compact,1,0
+    export KMP_AFFINITY=granularity=fine,noverbose,compact,1,0
     export KMP_BLOCKTIME=1
     export KMP_SETTINGS=1
     export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
     export OMP_PROC_BIND=true
-    echo "This environment is ready to use!"
+    conda install -y numpy tensorflow keras
 fi
 
 EOT
-source deactivate
+conda deactivate
 
 
 #### Create Python 2.7 MXNet env ####
@@ -85,23 +87,22 @@ touch $LOCATION/etc/conda/activate.d/install_mx27.sh
 cat <<EOT >> $LOCATION/etc/conda/activate.d/install_mx27.sh
 # !/bin/bash
 # Check if MXNet is already installed
-if conda list | grep 'mxnet-mkl';
+if conda list | grep -q 'mxnet-mkl';
 then
     :
 else
     echo "Installing Intel Optimized MXNet..."
     echo "This is a one-time installation, and may take a minute..."
-    conda install -y numpy opencv Pillow scipy scikit-learn mxnet-mkl keras
-    export KMP_AFFINITY=granularity=fine,verbose,compact,1,0
+    export KMP_AFFINITY=granularity=fine,noverbose,compact,1,0
     export KMP_BLOCKTIME=1
     export KMP_SETTINGS=1
     export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
     export OMP_PROC_BIND=true
-    echo "This environment is ready to use!"
+    conda install -y numpy opencv Pillow scipy scikit-learn mxnet-mkl keras
 fi
 
 EOT
-source deactivate
+conda deactivate
 
 
 #### Create Python 2.7 MXNet env ####
@@ -117,27 +118,26 @@ touch $LOCATION/etc/conda/activate.d/install_mx36.sh
 cat <<EOT >> $LOCATION/etc/conda/activate.d/install_mx36.sh
 # !/bin/bash
 # Check if MXNet is already installed
-if conda list | grep 'mxnet-mkl';
+if conda list | grep -q 'mxnet-mkl';
 then
     :
 else
     echo "Installing Intel Optimized MXNet..."
     echo "This is a one-time installation, and may take a minute..."
-    conda install -y numpy opencv Pillow scipy scikit-learn mxnet-mkl keras
-    export KMP_AFFINITY=granularity=fine,verbose,compact,1,0
+    export KMP_AFFINITY=granularity=fine,noverbose,compact,1,0
     export KMP_BLOCKTIME=1
     export KMP_SETTINGS=1
     export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
     export OMP_PROC_BIND=true
-    echo "This environment is ready to use!"
+    conda install -y numpy opencv Pillow scipy scikit-learn mxnet-mkl keras
 fi
 
 EOT
-source deactivate
+conda deactivate
 
 
 #### Create Python 2.7 PyTorch env ####
-yes 'y' | conda create -n intel_pytorch_p27 -c intel python=2 
+yes 'y' | conda create -n intel_pytorch_p27 -c intel python=2 pip numpy pyyaml mkl mkl-include setuptools cmake cffi typing
 
 # Create a post-activate script to install all packages
 source activate intel_pytorch_p27
@@ -149,32 +149,31 @@ touch $LOCATION/etc/conda/activate.d/install_pt27.sh
 cat <<EOT >> $LOCATION/etc/conda/activate.d/install_pt27.sh
 # !/bin/bash
 # Check if PyTorch is already installed
-if conda list | grep 'mxnet-mkl';
+if conda list | grep -q '^torch';
 then
     :
 else
     echo "Installing Intel Optimized PyTorch..."
     echo "This is a one-time installation, and may take a minute..."
-    conda install -y pip numpy pyyaml mkl mkl-include setuptools cmake cffi typing
-    git clone --recursive https://github.com/intel/pytorch
     export NO_CUDA=1
-    export CMAKE_PREFIX_PATH=~/anaconda3/
+    export CMAKE_PREFIX_PATH=~/data/anaconda/
+    git clone --recursive https://github.com/intel/pytorch
     cd pytorch
     python setup.py install
-    export KMP_AFFINITY=granularity=fine,verbose,compact,1,0
+    cd
+    export KMP_AFFINITY=granularity=fine,noverbose,compact,1,0
     export KMP_BLOCKTIME=1
     export KMP_SETTINGS=1
     export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
     export OMP_PROC_BIND=true
-    echo "This environment is ready to use!"
 fi
 
 EOT
-source deactivate
+conda deactivate
 
 
-#### Create Python 2.7 PyTorch env ####
-yes 'y' | conda create -n intel_pytorch_p36 -c intel python=3 
+#### Create Python 3.6 PyTorch env ####
+yes 'y' | conda create -n intel_pytorch_p36 -c intel python=3 numpy pyyaml mkl mkl-include setuptools cmake cffi typing
 
 # Create a post-activate script to install all packages
 source activate intel_pytorch_p36
@@ -186,25 +185,24 @@ touch $LOCATION/etc/conda/activate.d/install_pt36.sh
 cat <<EOT >> $LOCATION/etc/conda/activate.d/install_pt36.sh
 # !/bin/bash
 # Check if PyTorch is already installed
-if conda list | grep 'mxnet-mkl';
+if conda list | grep -q '^torch';
 then
     :
 else
     echo "Installing Intel Optimized PyTorch..."
     echo "This is a one-time installation, and may take a minute..."
-    conda install -y pip numpy pyyaml mkl mkl-include setuptools cmake cffi typing
-    git clone --recursive https://github.com/intel/pytorch
     export NO_CUDA=1
-    export CMAKE_PREFIX_PATH=~/anaconda3/
+    export CMAKE_PREFIX_PATH=~/data/anaconda/
+    git clone --recursive https://github.com/intel/pytorch
     cd pytorch
     python setup.py install
-    export KMP_AFFINITY=granularity=fine,verbose,compact,1,0
+    cd
+    export KMP_AFFINITY=granularity=fine,noverbose,compact,1,0
     export KMP_BLOCKTIME=1
     export KMP_SETTINGS=1
     export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
     export OMP_PROC_BIND=true
-    echo "This environment is ready to use!"
 fi
 
 EOT
-source deactivate
+conda deactivate
