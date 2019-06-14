@@ -1,67 +1,105 @@
 # !/bin/bash
-# Usage: bash intel_optimized_ml_envs.sh
+# Usage: bash custom_ml_envs.sh
+
+# Note: in conda 4.6, the post-activate file is sourced every
+# time conda is run, not just every time we activate the 
+# environment, as in 4.3.
 
 # Add conda, activate to PATH
-export PATH=/anaconda/envs/py35/bin:$PATH
+conda_path=`find / -wholename *anaconda/bin/conda`
+export PATH=${conda_path::-6}:$PATH
 
 # Add Intel channel to conda
 conda config --add channels intel
 
-# Create Python 2.7 TensorFlow env
-yes 'y' | conda create -n intel_tensorflow_p27 -c intel python=2 numpy tensorflow keras
-source activate intel_tensorflow_p27
-export KMP_AFFINITY=granularity=fine,verbose,compact,1,0
-export KMP_BLOCKTIME=1
-export KMP_SETTINGS=1
-export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
-export OMP_PROC_BIND=true
+#### Create Python 3 TensorFlow env ####
+yes 'y' | conda create -n intel_tensorflow_p3 -c intel python=3 
+
+# Create a post-activate script to install all packages
+source activate intel_tensorflow_p3
+TF_LOCATION=$CONDA_PREFIX
+mkdir -p $TF_LOCATION/etc/conda/activate.d/
+touch $TF_LOCATION/etc/conda/activate.d/install_tf3.sh
 conda deactivate
 
-# Create Python 3.6 TensorFlow env
-yes 'y' | conda create -n intel_tensorflow_p36 -c intel python=3 numpy tensorflow keras
-source activate intel_tensorflow_p36
-export KMP_AFFINITY=granularity=fine,verbose,compact,1,0
-export KMP_BLOCKTIME=1
-export KMP_SETTINGS=1
-export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
-export OMP_PROC_BIND=true
+# Write install instructions to post-activate file
+cat <<EOT >> $TF_LOCATION/etc/conda/activate.d/install_tf3.sh
+# !/bin/bash
+# Check if TensorFlow is already installed
+if ! conda list | grep -q 'intel-tensorflow';
+then
+    echo "Installing Intel Optimized TensorFlow..."
+    echo "This is a one-time installation, and may take a minute..."
+    export KMP_AFFINITY=granularity=fine,noverbose,compact,1,0
+    export KMP_BLOCKTIME=1
+    export KMP_SETTINGS=1
+    export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
+    export OMP_PROC_BIND=true
+    conda install -y -c intel tensorflow keras
+fi
+
+EOT
+
+
+#### Create Python 3 MXNet env ####
+yes 'y' | conda create -n intel_mxnet_p3 -c intel python=3 
+
+# Create a post-activate script to install all packages
+source activate intel_mxnet_p3
+MX_LOCATION=$CONDA_PREFIX
+mkdir -p $MX_LOCATION/etc/conda/activate.d/
+touch $MX_LOCATION/etc/conda/activate.d/install_mx3.sh
 conda deactivate
 
-# Create Python 2.7 MXNet env
-yes 'y' | conda create -n intel_mxnet_p27 -c intel python=2 numpy opencv Pillow scipy scikit-learn mxnet-mkl keras
-source activate intel_mxnet_p27
-export LD_LIBRARY_PATH=/usr/local/lib
-export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
-export KMP_AFFINITY=granularity=fine,compact,1,0
-export KMP_BLOCKTIME=1
-export OMP_PROC_BIND=true
+# Write install instructions to post-activate file
+cat <<EOT >> $MX_LOCATION/etc/conda/activate.d/install_mx3.sh
+# !/bin/bash
+# Check if MXNet is already installed
+if ! conda list | grep -q 'mxnet-mkl';
+then
+    echo "Installing Intel Optimized MXNet..."
+    echo "This is a one-time installation, and may take a minute..."
+    export KMP_AFFINITY=granularity=fine,noverbose,compact,1,0
+    export KMP_BLOCKTIME=1
+    export KMP_SETTINGS=1
+    export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
+    export OMP_PROC_BIND=true
+    conda install -y -c intel mxnet-mkl
+fi
+
+EOT
+
+
+#### Create Python 3 PyTorch env ####
+## Must build the environment with supporting packages first - doesn't add much extra time
+yes 'y' | conda create -n intel_pytorch_p3 -c intel python=3 numpy pyyaml mkl mkl-include setuptools cmake cffi typing
+
+# Create a post-activate script to install all packages
+source activate intel_pytorch_p3
+PT_LOCATION=$CONDA_PREFIX
+mkdir -p $PT_LOCATION/etc/conda/activate.d/
+touch $PT_LOCATION/etc/conda/activate.d/install_pt3.sh
 conda deactivate
 
-# Create Python 3.6 MXNet env
-yes 'y' | conda create -n intel_mxnet_p36 -c intel python=3 numpy opencv Pillow scipy scikit-learn mxnet-mkl keras
-source activate intel_mxnet_p36
-export LD_LIBRARY_PATH=/usr/local/lib
-export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
-export KMP_AFFINITY=granularity=fine,compact,1,0
-export KMP_BLOCKTIME=1
-export OMP_PROC_BIND=true
-conda deactivate
+# Write install instructions to post-activate file
+cat <<EOT >> $PT_LOCATION/etc/conda/activate.d/install_pt3.sh
+# !/bin/bash
+# Check if PyTorch is already installed
+if ! conda list | grep -q '^torch';
+then
+    echo "Installing Intel Optimized PyTorch..."
+    echo "This is a one-time installation, and may take a minute..."
+    export NO_CUDA=1
+    export CMAKE_PREFIX_PATH=~/data/anaconda/
+    git clone --recursive https://github.com/intel/pytorch
+    cd pytorch
+    python setup.py install
+    cd
+    export KMP_AFFINITY=granularity=fine,noverbose,compact,1,0
+    export KMP_BLOCKTIME=1
+    export KMP_SETTINGS=1
+    export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
+    export OMP_PROC_BIND=true
+fi
 
-# Create Python 2.7 PyTorch env
-yes 'y' | conda create -n intel_pytorch_p27 -c intel python=2 pip numpy pyyaml mkl mkl-include setuptools cmake cffi typing
-source activate intel_pytorch_p27
-git clone --recursive https://github.com/intel/pytorch
-export NO_CUDA=1
-export CMAKE_PREFIX_PATH=~/anaconda3/
-cd pytorch
-python setup.py install
-conda deactivate
-
-# Create Python 3.6 PyTorch env
-yes 'y' | conda create -n intel_pytorch_p36 -c intel python=3 pip numpy pyyaml mkl mkl-include setuptools cmake cffi typing
-source activate intel_pytorch_p36
-export NO_CUDA=1
-export CMAKE_PREFIX_PATH=~/anaconda3/
-cd pytorch
-python setup.py install
-conda deactivate
+EOT
