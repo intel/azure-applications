@@ -41,7 +41,7 @@ else
 fi
 
 # Check TF version so that we clone the right benchmarks
-source activate intel_tensorflow_p36
+conda activate intel_tensorflow_p3
 export tfversion=$(python -c "import tensorflow as tf;print(tf.__version__)")
 conda deactivate
 arr=(${tfversion//./ })  # Parse version and release
@@ -71,7 +71,7 @@ for network in "${networks[@]}" ; do
 done
 
 ## Run benchmark scripts in the Intel Optimized environment
-source activate intel_tensorflow_p36
+conda activate intel_tensorflow_p3
 
 for network in "${networks[@]}" ; do
   for bs in "${batch_sizes[@]}"; do
