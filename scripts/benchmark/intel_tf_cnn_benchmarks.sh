@@ -16,13 +16,14 @@
 #
 
 ####### USAGE #########
-# bash intel_tf_cnn_benchmarks.sh <option> 
+# bash intel_tf_cnn_benchmarks.sh <all> 
 # 
-# By default, this runs only InceptionV3 at batch size 128. Pass "all" in the <option> 
-# position to run all networks and batch sizes in the benchmarking suite.
+# By default, this runs only InceptionV3 at batch size 128. Pass "all" argument 
+# to run all networks and batch sizes in the benchmarking suite.
 # 
-# This script runs training with TensorFlow's CNN Benchmarks and summarizes throughput increases when  
-# using Intel optimized TensorFlow.
+# This script runs training with TensorFlow's CNN Benchmarks and summarizes 
+# throughput increases when using Intel optimized TensorFlow.
+
 # Note: you may need to edit benchmarks/scripts/tf_cnn_benchmarks/datasets.py to 
 # import _pickle instead of Cpickle
 
@@ -40,6 +41,9 @@ else
   batch_sizes=( 32 64 128 )
 fi
 
+# Set path to conda 
+export PATH=/data/anaconda/envs/py35/bin/:$PATH
+
 # Check TF version so that we clone the right benchmarks
 conda activate intel_tensorflow_p36
 export tfversion=$(python -c "import tensorflow as tf;print(tf.__version__)")
@@ -53,9 +57,10 @@ git clone -b cnn_tf_v${version}.${release}_compatible  https://github.com/tensor
 cd benchmarks/scripts/tf_cnn_benchmarks
 rm *.log # remove logs from any previous benchmark runs
 
-conda activate py36
-pip install tensorflow
 ## Run benchmark scripts in the default environment
+# Activate the default env
+conda activate py35
+
 for network in "${networks[@]}" ; do
   for bs in "${batch_sizes[@]}"; do
     echo -e "\n\n #### Starting $network and batch size = $bs ####\n\n"
@@ -72,6 +77,7 @@ for network in "${networks[@]}" ; do
   done
 done
 
+# Deactivate the default env
 conda deactivate 
 
 ## Run benchmark scripts in the Intel Optimized environment
