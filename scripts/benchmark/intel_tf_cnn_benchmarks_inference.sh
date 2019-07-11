@@ -48,8 +48,11 @@ else
   batch_sizes=( 1 )
 fi
 
+# Set path to conda
+export PATH=/data/anaconda/envs/py35/bin/:$PATH
+
 # Check TF version so that we clone the right benchmarks
-source activate intel_tensorflow_p36
+source activate intel_tensorflow_p3
 export tfversion=$(python -c "import tensorflow as tf;print(tf.__version__)")
 source deactivate
 arr=(${tfversion//./ })  # Parse version and release
@@ -62,6 +65,8 @@ cd benchmarks/scripts/tf_cnn_benchmarks
 rm *.log # remove logs from any previous benchmark runs
 
 ## Run benchmark scripts in the default environment
+# Activate the default env
+conda activate py35
 for network in "${networks[@]}" ; do
   for bs in "${batch_sizes[@]}"; do
     echo -e "\n\n #### Starting $network and batch size = $bs ####\n\n"
@@ -76,8 +81,11 @@ for network in "${networks[@]}" ; do
   done
 done
 
+# Deactivate the default env
+conda deactivate
+
 ## Run benchmark scripts in the Intel Optimized environment
-source activate intel_tensorflow_p36
+source activate intel_tensorflow_p3
 
 for network in "${networks[@]}" ; do
   for bs in "${batch_sizes[@]}"; do
