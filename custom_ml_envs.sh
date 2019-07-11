@@ -6,15 +6,14 @@
 # environment, as in 4.3.
 
 # Add conda, activate to PATH
-# conda_path=`find / -wholename *anaconda/bin/conda`
-# export PATH=${conda_path::-6}:$PATH
-export PATH=/data/anaconda/envs/py35/bin/:$PATH
+conda_path=`find / -wholename *anaconda/bin/conda`
+export PATH=${conda_path::-6}:$PATH
 
 # Add Intel channel to conda
 conda config --add channels intel
 
 #### Create Python 3 TensorFlow env ####
-yes 'y' | conda create -n intel_tensorflow_p3 -c intel python=3
+yes 'y' | conda create -n intel_tensorflow_p3 -c intel python=3 
 
 # Create a post-activate script to install all packages
 source activate intel_tensorflow_p3
@@ -36,11 +35,11 @@ then
     export KMP_SETTINGS=1
     export OMP_NUM_THREADS=$(lscpu | grep "Core(s) per socket" | cut -d':' -f2 | sed "s/ //g")
     export OMP_PROC_BIND=true
-    # Issues with conda install, use pip instead
-    pip install intel-tensorflow
+    conda install -y -c intel tensorflow keras
 fi
 
 EOT
+
 
 #### Create Python 3 MXNet env ####
 yes 'y' | conda create -n intel_mxnet_p3 -c intel python=3 

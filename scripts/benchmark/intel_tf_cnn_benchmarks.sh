@@ -45,7 +45,11 @@ fi
 export PATH=/data/anaconda/envs/py35/bin/:$PATH
 
 # Check TF version so that we clone the right benchmarks
+<<<<<<< HEAD
 conda activate intel_tensorflow_p36
+=======
+source activate intel_tensorflow_p3
+>>>>>>> origin/master
 export tfversion=$(python -c "import tensorflow as tf;print(tf.__version__)")
 conda deactivate
 arr=(${tfversion//./ })  # Parse version and release
@@ -81,7 +85,11 @@ done
 conda deactivate 
 
 ## Run benchmark scripts in the Intel Optimized environment
+<<<<<<< HEAD
 conda activate intel_tensorflow_p36
+=======
+source activate intel_tensorflow_p3
+>>>>>>> origin/master
 
 for network in "${networks[@]}" ; do
   for bs in "${batch_sizes[@]}"; do
