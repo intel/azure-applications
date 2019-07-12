@@ -19,5 +19,5 @@ Instructions are organized into two sections:
 #### Usage:
 
 -  Display available virtual environments with `conda env list`
--   Activate the desired virtual environment with `source activate <env_name>` (ex: `source activate intel_tensorflow_p36`)
+-   Activate the desired virtual environment with `source activate <env_name>` (ex: `source activate intel_tensorflow_p3`)
 -   To run **benchmarks**, follow instructions [here](https://github.com/IntelAI/azure-applications/blob/master/scripts/benchmark/intel_tf_cnn_benchmarks.sh)
