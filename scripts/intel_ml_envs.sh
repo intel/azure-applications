@@ -95,3 +95,8 @@ then
 fi
 
 EOT
+
+
+#### Create Python 3 TensorFlow env with default TF for benchmarking purposes ####
+yes 'y' | conda create -n tensorflow_p37 python=3.7
+
