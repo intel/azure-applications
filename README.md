@@ -1,3 +1,7 @@
+# DISCONTINUATION OF PROJECT #
+This project will no longer be maintained by Intel.
+Intel has ceased development and contributions including, but not limited to, maintenance, bug fixes, new releases, or updates, to this project.
+Intel no longer accepts patches to this project.
 # Intel Optimized Azure Data Science Virtual Machine for Linux (Ubuntu)
 
 This repo contains code and instructions for launching a pre-configured Azure Data Science Virtual Machine (DSVM) for Linux with CPU-optimized TensorFlow, MXNet and PyTorch. For more information, see our recent [blog](https://www.intel.ai/intel-optimized-data-science-virtual-machine-azure) detailing some optimizations and startup instructions.
